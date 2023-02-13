@@ -25,7 +25,7 @@ The Notifier was developed to be deployed on a Google Cloud Function but it can 
 
 ## Known Issues
 
-* Videos published close to script run time will aren't notified
+* Videos published close to script run time will not trigger a notification email
 * Livestreams are interpreted as regular videos
 * Premiered videos are interpreted as already available videos
 
@@ -45,11 +45,11 @@ Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of cond
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
+We use [Semantic Versioning](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
 
 ## Authors
 
-* **Yannik Beaulieu** - [Bibz87-CG](https://github.com/Bibz87-CG)
+* **Yannik Beaulieu** - [Bibz87](https://github.com/Bibz87)
 
 ## License
 
