@@ -4,6 +4,7 @@ from google.auth.transport.requests import Request
 from email.mime.text import MIMEText
 import base64
 from datetime import datetime
+from enum import Enum
 
 import isodate
 
@@ -20,6 +21,12 @@ gmailApi = None
 mongoClient = None
 dbCollection = None
 # --
+
+
+class VideoType(Enum):
+    VIDEO = "video"
+    SHORT = "short"
+
 
 def connectDb():
     print("Connecting to database")
@@ -278,14 +285,24 @@ def getVideos(youtubeApi, videoIds):
     return videos
 
 
+def getVideoType(video):
+    duration = isodate.parse_duration(video["contentDetails"]["duration"])
+    if duration.total_seconds() <= 60:
+        return VideoType.SHORT
+    else:
+        return VideoType.VIDEO
+
+
 def sendEmail(channel, video):
     with open('./templates/video-upload-email.html') as emailTemplateFile:
         body = replaceTemplateVariables(
             emailTemplateFile.read(), channel, video)
 
+    videoType = getVideoType(video)
+
     emailAddress = gmailApi.users().getProfile(userId="me").execute()["emailAddress"]
     message = createMessage(emailAddress,
-                            channel["snippet"]["title"] + " just uploaded a video",
+                            channel["snippet"]["title"] + " just uploaded a " + videoType.value,
                             body)
 
     result = gmailApi.users().messages().send(userId="me", body=message).execute()
@@ -305,9 +322,11 @@ def replaceTemplateVariables(body, channel, video):
 
     videoDescription = video["snippet"]["description"].replace("\n", "<br/>")
     shortVideoDescriptionLength = maxSummaryLength - len(channelTitle)
+    videoType = getVideoType(video)
 
     result = result.replace("[%VIDEO_ID%]", video["id"])
     result = result.replace("[%VIDEO_TITLE%]", video["snippet"]["title"])
+    result = result.replace("[%VIDEO_TYPE%]", videoType.value)
     result = result.replace("[%VIDEO_SHORT_DESCRIPTION%]", cleanHtml(videoDescription)[0:shortVideoDescriptionLength])
     result = result.replace("[%VIDEO_DESCRIPTION%]", videoDescription)
     result = result.replace("[%VIDEO_THUMBNAIL_URL%]", video["snippet"]["thumbnails"]["high"]["url"])
