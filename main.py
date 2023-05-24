@@ -7,6 +7,7 @@ from datetime import datetime
 from enum import Enum
 
 import isodate
+import requests
 
 from pymongo import MongoClient
 
@@ -285,9 +286,16 @@ def getVideos(youtubeApi, videoIds):
     return videos
 
 
+def isShortVideo(videoId):
+    # Algorithm taken from https://stackoverflow.com/q/71192605
+    url = "https://www.youtube.com/shorts/" + videoId
+    response = requests.request("HEAD", url, allow_redirects=False)
+
+    return response.status_code == 200
+
+
 def getVideoType(video):
-    duration = isodate.parse_duration(video["contentDetails"]["duration"])
-    if duration.total_seconds() <= 60:
+    if isShortVideo(video["id"]):
         return VideoType.SHORT
     else:
         return VideoType.VIDEO
